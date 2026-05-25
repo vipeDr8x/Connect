@@ -1,0 +1,1 @@
+export type AccountType = 'deaf' | 'blind' | 'non-verbal';
