@@ -1,6 +1,6 @@
-import { Stack, SplashScreen } from "expo-router";
+import { PlayfairDisplay_500Medium, useFonts } from '@expo-google-fonts/playfair-display';
+import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from 'react';
-import { useFonts, PlayfairDisplay_500Medium } from '@expo-google-fonts/playfair-display';
 
 
 export default function RootLayout() {

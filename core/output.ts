@@ -1,7 +1,7 @@
-import { translateFromMorse, translateToMorse } from '@/core/morse';
+import { translateToMorse } from '@/core/morse';
+import { AccountType } from '@/types/profile';
 import * as Speech from 'expo-speech';
 import { Vibration } from "react-native";
-import { AccountType } from '@/types/profile'
 
 
 export function getMessageAsVibrationsArray(messageInMorse: string): number[] {
