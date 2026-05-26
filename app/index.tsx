@@ -25,28 +25,39 @@ export default function Index() {
    const lastPressRef = useRef<number|null>(null);
    const [morseMessage, setMorseMessage] = useState<string>('');
    const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-   let translatedMorse: string = '';
-
-   try{
-       translatedMorse = translateFromMorse(morseMessage);
-   } catch (error){
-        console.log("Този символ е невалиден"); // Implement to show message and restart flow on invalid symbol
-        // setPhase('idle');
-   }
+   let [translatedMorse, setTranslatedMorse] = useState<string|null>(null);
    
    useEffect(() => {
        if (phase === 'done'){
-           displayMessageVibrationsSpeech("Край на въвеждането на морзов код. Вие казахте: ", accountType);
-           displayMessageVibrationsSpeech(translatedMorse, accountType);
+           try {
+                const result = translateFromMorse(morseMessage)
+                setTranslatedMorse(result);
+
+                displayMessageVibrationsSpeech("Край на въвеждането на морзов код. Вие казахте: ", accountType);
+                displayMessageVibrationsSpeech(result, accountType);
+
+            } catch (error){
+                let message: string;
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else {
+                    message = String(error);
+                }
+
+                message = message.replace('-', 'тире');
+                message = message.replace('.', 'точка');
+                
+                displayMessageVibrationsSpeech(message, accountType);
+            }
+
            displayMessageVibrationsSpeech("За да започнете да въвеждате ново съобщение, натиснете два пъти на екрана", accountType);
-           
-           lastPressRef.current = null;
         }
         else if (phase === 'idle'){
             displayMessageVibrationsSpeech("Натиснете два пъти на екрана, за да започнете да въвеждате морзов код.", accountType);
         }
     }, [phase])
-
+    
     
     useEffect(() => {
         if (timesPressed == 2) {
@@ -54,6 +65,8 @@ export default function Index() {
             setMorseMessage('');
             setPhase('receiving');
             setTimesPressed(0);
+            lastPressRef.current = null;
+            setTranslatedMorse(null);
             
         }
         
@@ -61,7 +74,7 @@ export default function Index() {
     
     
     const onPressIn = () => {
-        Vibration.vibrate([0, 400, 0, 400, 0, 400, 0, 400, ]);
+        Vibration.vibrate([0, 400, 0, 400, 0, 400, 0, 400, ]); // vibrations goes up to 1.6 seconds -> more than enough to signalize a long press for the user (maybe make it infinite somehow?)
         
         
         if (lastPressRef.current !== null){
@@ -109,16 +122,16 @@ export default function Index() {
     
     return (
         <Pressable
-        style={styles.container}
-        onPress={() => {
-        (phase === 'idle' || phase === 'done') ? setTimesPressed(prev => prev + 1): null
-      }}
-      onPressIn={() => phase === 'receiving' ? onPressIn(): null}
-      onPressOut={() => phase === 'receiving' ? onPressOut(): null}
-    >
-        <Text style={styles.morseText}>{phase === 'done' ? `Вие казахте:\n ${translatedMorse}`: morseMessage}</Text>
+            style={styles.container}
+            onPress={() => {
+            (phase === 'idle' || phase === 'done') ? setTimesPressed(prev => prev + 1): null
+        }}
+        onPressIn={() => phase === 'receiving' ? onPressIn(): null}
+        onPressOut={() => phase === 'receiving' ? onPressOut(): null}
+        >
+            <Text style={styles.morseText}>{phase === 'done' ? (translatedMorse !== null ? `Вие казахте:\n ${translatedMorse}`: '') : morseMessage}</Text>
 
-    </Pressable>
+        </Pressable>
   );
 }
 

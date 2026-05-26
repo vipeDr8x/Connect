@@ -11,10 +11,12 @@ export function translateToMorse(text: string): string{
     
     let morseCodedArr: string[] = [];
     
+    console.log("tyk");
+    console.log(text);
     for (let c of text.trim()){
         c = c.toLowerCase();
         if (!(c in MAPPER)){
-            throw new Error(`Символът ${c} не се поддържа!`);
+            throw Error(`Символът ${c} не се поддържа!`);
         }
         morseCodedArr.push(MAPPER[c]);
     }
@@ -29,6 +31,7 @@ export function translateFromMorse(morseCode: string): string{
         return '';
     }
     
+    console.log(morseCode);
     const codes = morseCode.trim().split(" ");
     const message: string[] = [];
     
@@ -36,12 +39,10 @@ export function translateFromMorse(morseCode: string): string{
         code = code;
         if (!(code in reverseMapper)){
             console.log(code);
-            throw new Error(`Символът ${code} не се поддържа!`);
+            throw Error(`Символът ${code} не се поддържа!`);
         }
         message.push(reverseMapper[code])
     }
 
     return message.join("");
 }
-
-console.log(translateToMorse("аз съм добре"));
