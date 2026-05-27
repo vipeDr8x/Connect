@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { Text, Pressable, StyleSheet, Vibration } from "react-native";
-import { displayMessageVibrationsSpeech } from '@/core/output';
 import { translateFromMorse } from '@/core/morse';
+import { displayMessageVibrationsSpeech } from '@/core/output';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, Vibration, View } from "react-native";
 
 
 export default function Index() {
@@ -126,7 +126,19 @@ export default function Index() {
         onPressIn={() => phase === 'receiving' ? onPressIn(): null}
         onPressOut={() => phase === 'receiving' ? onPressOut(): null}
         >
-            <Text style={styles.morseText}>{phase === 'done' ? (translatedMorse !== null ? `Вие казахте:\n ${translatedMorse}`: '') : morseMessage}</Text>
+            <View style={styles.upperHalf}>
+            <View style={styles.infoBox}>
+                <Text style={styles.labelText}>
+                    Морз: {morseMessage || '...'}
+                </Text>
+                <Text style={styles.labelText}>
+                    Превод: {phase === 'done' && translatedMorse !== null ? translatedMorse : '...'}
+                </Text>
+            </View>
+        </View>
+
+        
+        <View style={styles.lowerHalf} />
 
         </Pressable>
   );
@@ -138,17 +150,31 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#2A9D8F'
     },
-    morseText: {
+    upperHalf: {
         width: '100%',
         height: '50%',
-        paddingTop: 80,
-        textAlign: 'center',
-        color: '#FFF',
-        fontSize: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 25,
         borderBottomColor: 'black',
-        borderBottomWidth: 3,
-        paddingLeft: 30,
-        paddingRight: 30,
-        fontFamily: 'Playfair-Display-Regular'
+        borderBottomWidth: 3, 
+    },
+    lowerHalf: {
+        width: '100%',
+        height: '50%',
+    },
+    infoBox: {
+        backgroundColor: 'rgba(0, 0, 0, 0.25)', 
+        padding: 20,
+        borderWidth: 1.5,
+        borderColor: '#FFFFFF',
+        width: '100%',
+    },
+    labelText: {
+        color: '#FFFFFF',
+        fontSize: 26,
+        fontWeight: 'bold',
+        marginVertical: 8,
+        textAlign: 'left',
     }
 });
