@@ -39,7 +39,7 @@ export function translateFromMorse(morseCode: string): string{
         code = code;
         if (!(code in reverseMapper)){
             console.log(code);
-            throw Error(`Символът ${code} не се поддържа!`);
+            throw Error(`Символът не се поддържа!`);
         }
         message.push(reverseMapper[code])
     }

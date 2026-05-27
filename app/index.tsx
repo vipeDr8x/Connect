@@ -44,9 +44,6 @@ export default function Index() {
                 } else {
                     message = String(error);
                 }
-
-                message = message.replace('-', 'тире');
-                message = message.replace('.', 'точка');
                 
                 displayMessageVibrationsSpeech(message, accountType);
             }
