@@ -127,18 +127,18 @@ export default function Index() {
         onPressOut={() => phase === 'receiving' ? onPressOut(): null}
         >
             <View style={styles.upperHalf}>
-            <View style={styles.infoBox}>
-                <Text style={styles.labelText}>
-                    Морз: {morseMessage || '...'}
-                </Text>
-                <Text style={styles.labelText}>
-                    Превод: {phase === 'done' && translatedMorse !== null ? translatedMorse : '...'}
-                </Text>
+                <View style={styles.infoBox}>
+                    <Text style={styles.labelText}>
+                        Морз: {morseMessage || '...'}
+                    </Text>
+                    <Text style={styles.labelText}>
+                        Превод: {phase === 'done' && translatedMorse !== null ? translatedMorse : '...'}
+                    </Text>
+                </View>
             </View>
-        </View>
 
         
-        <View style={styles.lowerHalf} />
+            <View style={styles.lowerHalf} />
 
         </Pressable>
   );
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#FFFFFF',
         width: '100%',
+        borderRadius: 20
     },
     labelText: {
         color: '#FFFFFF',
