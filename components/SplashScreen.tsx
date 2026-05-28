@@ -1,13 +1,11 @@
 import Svg, { Path, Rect, Mask, Defs, Text as SvgText } from "react-native-svg";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
     Animated,
-    Image,
     StyleSheet,
-    Text,
-    View
 } from "react-native";
+import { Callback } from "@react-native-async-storage/async-storage/lib/typescript/types";
 
 
 const VB_WIDTH = 1253;
@@ -19,7 +17,11 @@ const LOGO_PATH = "M 317.74 597.57 C312.92,595.85 311.54,594.67 309.59,590.55 C3
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 
 
-export default function SplashScreenView() {
+export default function SplashScreenView( { 
+    onFinishLoading, 
+} : {
+    onFinishLoading: () => void;
+}){
     const fillAnimation = useRef(new Animated.Value(0)).current;
     const fadeAnimation = useRef(new Animated.Value(1)).current;
 
@@ -33,10 +35,10 @@ export default function SplashScreenView() {
         }),
         Animated.timing(fadeAnimation, {
             toValue: 0,
-            duration: 600,
+            duration: 300,
             useNativeDriver: true,
         })
-        ]).start();
+        ]).start(() => {onFinishLoading()});
     }, []);
 
 
