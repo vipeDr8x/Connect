@@ -25,6 +25,7 @@ export default function Index() {
    const lastPressRef = useRef<number|null>(null);
    const [morseMessage, setMorseMessage] = useState<string>('');
    const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   const vibrationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null); //I added it to try and do infinite vibrations but I couldnt but maybe it will be useful later
    let [translatedMorse, setTranslatedMorse] = useState<string|null>(null);
    
    useEffect(() => {
@@ -44,6 +45,9 @@ export default function Index() {
                 } else {
                     message = String(error);
                 }
+
+                message = message.replace('-', 'тире');
+                message = message.replace('.', 'точка');
                 
                 displayMessageVibrationsSpeech(message, accountType);
             }
@@ -70,50 +74,45 @@ export default function Index() {
     }, [timesPressed])
     
     
-    const onPressIn = () => {
-        Vibration.vibrate([0, 400, 0, 400, 0, 400, 0, 400, ]); // vibrations goes up to 1.6 seconds -> more than enough to signalize a long press for the user (maybe make it infinite somehow?)
-        
-        
-        if (lastPressRef.current !== null){
-            const timePause = Date.now() - lastPressRef.current;
-            
-            
-            // 250ms considered the max pause between the symbols of one letter,
-            // 1000ms considered max for between letters
-            // any more than that is considered a pause for separating words
-            // would be better to use ENUMS
-            
-            if (timePause > 250 && timePause <= 1000) { 
-                setMorseMessage(prev => prev + ' ')
-            } else if (timePause > 1000){
-                setMorseMessage(prev => prev + ' / ') // separator for between words
-            }
-            
-            
-        }
-        pressStartRef.current = Date.now();
-    }
+   const onPressIn = () => {
+   if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+   
+   
+   Vibration.vibrate([0, 400, 0, 400, 0, 400, 0, 400], true); 
+
+   pressStartRef.current = Date.now();
+   
+   if (lastPressRef.current !== null){
+       const timePause = Date.now() - lastPressRef.current;
+       
+       if (timePause > 250 && timePause <= 1000) { 
+           setMorseMessage(prev => prev + ' ')
+       } else if (timePause > 1000){
+           setMorseMessage(prev => prev + ' / ') 
+       }
+   }
+   pressStartRef.current = Date.now();
+   }
     
     const onPressOut = () => {
-        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-        
-        Vibration.cancel();
-        
-        const now = Date.now();
-        const duration = now - (pressStartRef.current as number); // onPressOut will always be triggered after onPressIn
-        
-        if (duration <= 200) { // configurable value in user settings on register or while using app
-            setMorseMessage(prev => prev + '.');
-        } else {
-            setMorseMessage(prev => prev + '-')
-        }
-        
-        silenceTimerRef.current = setTimeout(() => {
-            setPhase('done');
-        }, 5000);
-        
-        lastPressRef.current = Date.now();
-        
+    Vibration.cancel(); 
+    
+    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+    
+    const now = Date.now();
+    const duration = now - (pressStartRef.current as number);
+    
+    if (duration <= 200) { 
+        setMorseMessage(prev => prev + '.');
+    } else {
+        setMorseMessage(prev => prev + '-')
+    }
+    
+    silenceTimerRef.current = setTimeout(() => {
+        setPhase('done');
+    }, 5000);
+    
+    lastPressRef.current = Date.now();
     }
     
     
@@ -126,19 +125,20 @@ export default function Index() {
         onPressIn={() => phase === 'receiving' ? onPressIn(): null}
         onPressOut={() => phase === 'receiving' ? onPressOut(): null}
         >
+        
             <View style={styles.upperHalf}>
-                <View style={styles.infoBox}>
-                    <Text style={styles.labelText}>
-                        Морз: {morseMessage || '...'}
-                    </Text>
-                    <Text style={styles.labelText}>
-                        Превод: {phase === 'done' && translatedMorse !== null ? translatedMorse : '...'}
-                    </Text>
-                </View>
+            <View style={styles.infoBox}>
+                <Text style={styles.labelText}>
+                    Морз: {morseMessage || '...'}
+                </Text>
+                <Text style={styles.labelText}>
+                    Превод: {phase === 'done' && translatedMorse !== null ? translatedMorse : '...'}
+                </Text>
             </View>
+        </View>
 
         
-            <View style={styles.lowerHalf} />
+        <View style={styles.lowerHalf} />
 
         </Pressable>
   );
@@ -169,7 +169,6 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
         borderColor: '#FFFFFF',
         width: '100%',
-        borderRadius: 20
     },
     labelText: {
         color: '#FFFFFF',
