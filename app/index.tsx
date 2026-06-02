@@ -1,13 +1,13 @@
-import { Text } from 'react-native'
-import { useEffect, useState } from 'react'
-import SplashScreenView from '@/components/SplashScreen'
-import MainScreen from '@/components/MainScreen'
-import { checkUser } from '@/storage/profile'
-
+import MainScreen from "@/components/MainScreen";
+import SplashScreenView from "@/components/SplashScreen";
+import { checkUser } from "@/storage/profile";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Text } from "react-native";
 
 export default function Index() {
-    // Index page acts as a router for screens and not just displaying one static screen
-    /* 
+  // Index page acts as a router for screens and not just displaying one static screen
+  /* 
     1. We need to determine to which screen we are going to switch:
     - the profile registration
     - the MainScreen screen from MainScreen.tsx (user has an account)
@@ -17,43 +17,45 @@ export default function Index() {
 
     */
 
-    type Phase = null | 'needs-register' | 'ready';
+  type Phase = null | "needs-register" | "ready" | "loading-video";
 
-    const [phase, setPhase] = useState<Phase>(null);
-    const [user, setUser] = useState<null|string|undefined>(undefined); // null or UserProfile (TODO)
-    /* 
+  const [phase, setPhase] = useState<Phase>("loading-video");
+  const [user, setUser] = useState<null | string | undefined>(undefined); // null or UserProfile (TODO)
+  const router = useRouter();
+  /* 
     null is set if there is no profile
     undefined signifies there isn't a result yet
     UserProfile signifies there is a registered user
     */
-    const [isAnimationDone, setIsAnimationDone] = useState(false);
-    
-    useEffect(() => {
-        const check = async () => {
-            let result: null|string = await checkUser();
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
 
-            setUser(result);
-        }
+  useEffect(() => {
+    const check = async () => {
+      let result: null | string = await checkUser();
 
-        check();
-    }, [])
+      setUser(result);
+    };
 
+    check();
+    router.push("/splash");
+  }, []);
 
-    useEffect(() => {
-        if (isAnimationDone && user !== undefined) {
-            setPhase(user === null ? 'needs-register': 'ready');
-        }
-    }, [isAnimationDone, user])
-
-
-    switch (phase){
-        case 'needs-register':
-            return <Text style={{fontSize: 40}}>TODO</Text>;
-            
-        case 'ready':
-            return <MainScreen />;
+  useEffect(() => {
+    if (phase !== "loading-video" && isAnimationDone && user !== undefined) {
+      setPhase(user === null ? "needs-register" : "ready");
     }
-                
-    return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)}/>
-}
+  }, [isAnimationDone, user]);
 
+  switch (phase) {
+    case "loading-video":
+      return null;
+
+    case "needs-register":
+      return <Text style={{ fontSize: 40 }}>TODO</Text>;
+
+    case "ready":
+      return <MainScreen />;
+  }
+
+  return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)} />;
+}
