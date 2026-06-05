@@ -1,6 +1,7 @@
 import { PlayfairDisplay_500Medium, useFonts } from '@expo-google-fonts/playfair-display';
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export default function RootLayout() {
@@ -19,5 +20,9 @@ export default function RootLayout() {
     }
 
 
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+        <GestureHandlerRootView style={{flex: 1}}>
+            <Stack screenOptions={{ headerShown: false }} />  
+        </GestureHandlerRootView>
+    );
 }

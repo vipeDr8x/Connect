@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { UserProfile } from '@/types/profile'
 
 export async function checkUser() {
     try {
@@ -13,5 +13,19 @@ export async function checkUser() {
 
         return null;
 
+    }
+}
+
+export async function registerUser(user: UserProfile) {
+    try {
+        await AsyncStorage.setItem('@user_profile', JSON.stringify(user));
+
+        return true;
+    } catch (e) {
+        // error reading value
+        console.log("Error while saving user profile! " + e);
+        // implement error handling
+
+        return false;
     }
 }
