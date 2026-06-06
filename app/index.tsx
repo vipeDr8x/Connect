@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import SplashScreenView from '@/components/SplashScreen'
-import MainScreen from '@/components/MainScreen'
 import MainRouterScreen from '@/components/MainRouterScreen'
 import Register from '@/components/Register'
 import { checkUser } from '@/storage/profile'
@@ -8,8 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { UserProfile } from '@/types/profile'
 
 export default function Index() {
-    // Index page acts as a router for screens and not just displaying one static screen
-    /* 
+  // Index page acts as a router for screens and not just displaying one static screen
+  /* 
     1. We need to determine to which screen we are going to switch:
     - the profile registration
     - the MainScreen screen from MainScreen.tsx (user has an account)
@@ -35,19 +34,17 @@ export default function Index() {
         const check = async () => {
             let result: null|UserProfile = await checkUser();
 
-            setUser(result);
-        }
+      setUser(result);
+    };
 
-        check();
-    }, [])
+    check();
+  }, []);
 
-
-    useEffect(() => {
-        if (isAnimationDone && user !== undefined) {
-            setPhase(user === null ? 'needs-register': 'ready');
-        }
-    }, [isAnimationDone, user])
-
+  useEffect(() => {
+    if (isAnimationDone && user !== undefined) {
+      setPhase(user === null ? "needs-register" : "ready");
+    }
+  }, [isAnimationDone, user]);
 
     switch (phase){
         case 'needs-register':
@@ -59,4 +56,3 @@ export default function Index() {
                 
     return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)}/>
 }
-
