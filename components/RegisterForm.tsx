@@ -1,13 +1,10 @@
-import { getScreenReaderEnabled } from '@/accessibility/screenReader';
+import { LONG_PRESS_MIN_LENGTH_MS } from '@/config';
 import { speak, stopVibrationsSpeech } from '@/core/output';
 import { registerUser } from '@/storage/profile';
-import { CommunicationChannel } from '@/types/output';
 import { Disability } from '@/types/profile';
 import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-
+import { Pressable, StyleSheet, Text, Vibration, BackHandler, AccessibilityInfo } from 'react-native';
 
 interface Stage {
     phase: RegisterPhase,
@@ -20,27 +17,69 @@ const STAGES: Stage[] = [ // this keeps the order of the queries for disabilitie
     { phase: 'deaf-prompt', disability: 'deaf', bulgarian: 'не чувате' },
     { phase: 'non-verbal-prompt', disability: 'non-verbal', bulgarian: 'не говорите' },
 ];
+const FALLBACK_PER_SCREEN_TIME_MS = 6000;
 
-type Phase = 'idle' | 'registering' | 'confirming';
-type RegisterPhase = 'idle' | 'blind-prompt' | 'non-verbal-prompt' | 'deaf-prompt';
+type Phase = 'unmounted' | 'registering' | 'confirming';
+type RegisterPhase = 'unmounted' | 'blind-prompt' | 'non-verbal-prompt' | 'deaf-prompt';
 
 
 export default function RegisterForm( { 
-    onRegister,
-    channel
+    onRegister
 } : {
-    onRegister: () => void,
-    channel: CommunicationChannel
+    onRegister: () => void
 }
 ){
-    const [phase, setPhase] = useState<Phase>('idle');
-    const [registerPhase, setRegisterPhase] = useState<RegisterPhase>('idle');
-    const [timesPressed, setTimesPressed] = useState(0);
+    const [phase, setPhase] = useState<Phase>('unmounted');
+    const [registerPhase, setRegisterPhase] = useState<RegisterPhase>('unmounted');
+    
+    const timesPressedRef = useRef(0);
     const disabilitiesRef = useRef<Disability[]>([]);
-    const idleReasonRef = useRef<string|null>(null);
-    const timerRef = useRef<ReturnType<typeof setTimeout>|null>(null);
+    const unmountedReasonRef = useRef<string|null>(null); // signalizes if this process is an the first time or if it is repeating
+    const recommendedTimeoutMsRef = useRef<number|null>(null);
+    
     const [screenText, setScreenText] = useState<string>();
-    const silenceTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null);
+
+    const rejectConfirmation = () => {
+        unmountedReasonRef.current = "Не потвърдихте вашите увреждания.";
+        setPhase('unmounted');
+        setRegisterPhase('unmounted');
+        disabilitiesRef.current = [];
+    }
+
+    useEffect(() => {
+        AccessibilityInfo.getRecommendedTimeoutMillis(FALLBACK_PER_SCREEN_TIME_MS).then((value) => {
+            recommendedTimeoutMsRef.current = value;
+        });
+    }, [])
+
+
+    const goBack = useCallback((): boolean => {
+        switch (phase) {
+            case 'confirming':
+                rejectConfirmation();
+                return true;            // we handled it
+
+            case 'registering':
+                // undo the last answer, step one prompt back
+                const order = STAGES.map(s => s.phase);
+
+                const i = order.indexOf(registerPhase);
+                disabilitiesRef.current = disabilitiesRef.current.slice(0, -1);
+                if (i <= 0) { setPhase('unmounted'); setRegisterPhase('unmounted'); }
+                else setRegisterPhase(order[i - 1]);
+
+                return true;
+
+            default:
+                return false;           // unmounted: let the OS do its normal back (leave the screen)
+        }
+    }, [phase, registerPhase]);
+
+
+    useEffect(() => {
+        const sub = BackHandler.addEventListener('hardwareBackPress', goBack);
+        return () => sub.remove();
+    }, [goBack]);
 
 
     // v1: only probe-confirmed (sighted/hearing) users reach registration; deafblind get the holding state and a dedicated v2 flow.
@@ -53,12 +92,12 @@ export default function RegisterForm( {
 
     useEffect(() => {
         switch (phase) {
-            case 'idle':
-                idleReasonRef.current === null ? 
+            case 'unmounted':
+                unmountedReasonRef.current === null ? 
                     announce("За да започнете регистрацията си натиснете два пъти на екрана"):
-                    announce(`${idleReasonRef.current}\n За да опитате отново натиснете два пъти на екрана`)
+                    announce(`${unmountedReasonRef.current}\n За да опитате отново натиснете два пъти на екрана`)
 
-                idleReasonRef.current = null;
+                unmountedReasonRef.current = null;
                 break;
             case 'registering':
                 setRegisterPhase('blind-prompt');
@@ -76,36 +115,25 @@ export default function RegisterForm( {
                     msg = disabilitiesRef.current.map(x => STAGES.find((v) => v.disability === x)?.bulgarian).join(' и ');
                 }
 
-                announce(`За да потвърдите, че ${msg}, задръжте на екрана`);
-
-                timerRef.current = setTimeout(() => {
-                    idleReasonRef.current = "Не потвърдихте вашите увреждания";
-                    setPhase('idle');
-                    setRegisterPhase('idle');
-                    setTimesPressed(0);
-                    disabilitiesRef.current = [];
-                    timerRef.current = null;
-                }, 10000)
-
-                return () => {clearTimeout(timerRef.current as ReturnType<typeof setTimeout>)}
+                announce(`За да потвърдите, че ${msg}, задръжте на екрана. За да опитате отново натиснете два пъти на екрана.`);
+                
         }
         }, [phase])
 
 
     function promptHelper(disability: string, registerPhase?: RegisterPhase, phase?: Phase) {
-        // returns the timer id of the set timer for the time window
-
         announce(`Натиснете веднъж на екрана, ако ${disability}`);
 
         return setTimeout(() => {
             if (registerPhase) setRegisterPhase(registerPhase);
             if (phase) setPhase(phase);
-        }, 6000)
+        }, recommendedTimeoutMsRef.current || FALLBACK_PER_SCREEN_TIME_MS)
 
     }
 
+
     useEffect(() => {
-        if (registerPhase !== 'idle') {
+        if (registerPhase !== 'unmounted') {
             
             const stage = STAGES.find(s => s.phase === registerPhase) as Stage;
             let result = determineNextPhase(stage);
@@ -123,21 +151,12 @@ export default function RegisterForm( {
         if (phase) setPhase(phase);
 
     }
-
-
-    useEffect(() => {
-        if (phase === 'idle' && timesPressed === 2) {
-            setPhase('registering');
-            stopVibrationsSpeech();
-            setTimesPressed(0);
-        };
-    }, [phase, timesPressed]);
-
-
+    
+    
     const determineNextPhase = (stage: Stage) => {
         const i = STAGES.indexOf(stage);
         const isLast = i === STAGES.length - 1;
-
+        
         return {
             nextRegisterPhase: isLast ? undefined : STAGES[i + 1].phase,
             nextPhase: isLast ? ('confirming' as const) : undefined
@@ -146,84 +165,121 @@ export default function RegisterForm( {
     }
 
 
-    useEffect(() => {
-        if (phase === 'registering' && timesPressed) {
-            const stage = STAGES.find(s => s.phase === registerPhase) as Stage;
+    const handlePress = () => {
+        switch (phase) {
+            case 'unmounted':
+                if (++timesPressedRef.current >= 2) { timesPressedRef.current = 0; startFlow(); }
+                break;
+            case 'registering':
+                timesPressedRef.current = 0;
+                selectDisability(); // single tap selects
+                break;
+            case 'confirming':
+                if (++timesPressedRef.current >= 2) { timesPressedRef.current = 0; rejectConfirmation(); }
+                break;
+        }
+    };
 
-            let result = determineNextPhase(stage);
 
-            selectDisabilityHelper(stage.disability, result.nextRegisterPhase, result.nextPhase);
+    const confirmRegister = () => {
+         Vibration.cancel(); // cancel the activated vibration to signalize the user has confirmed his register and confirm registration
 
-            setTimesPressed(0);
-        };
-
-    }, [phase, timesPressed]);
-
-
-    useEffect(() => {
-        if (phase === 'confirming' && timesPressed === 2) {
-            if (timerRef.current !== null) clearTimeout(timerRef.current);
+        const register = async () => {
+        const result = await registerUser({disabilities: new Set(disabilitiesRef.current)})
     
-    
-                const register = async () => {
-                    const result = await registerUser({disabilities: new Set(disabilitiesRef.current)})
-            
-                    if (result) {
-                        onRegister();
-                        
-                    } else {
-                        announce("Възникна грешка");
-                        setPhase('idle'); // total restart
-                    };
-                }
+            if (result) {
+                onRegister();
                 
-                register();
-                setTimesPressed(0); 
-                };
-
-        }, [phase, timesPressed]);
-
-
-
-    return (
-        <>
-        <Pressable 
-            onPress={() => {
-                setTimesPressed(prev => prev + 1)
-            }}
-            accessibilityRole='button'
-            accessibilityLabel={screenText}
-            onPressIn={() => {
-                if (silenceTimerRef !== null) clearTimeout(silenceTimerRef.current as ReturnType<typeof setTimeout>);
-            }}
-            onPressOut={() => {
-                if (phase === 'registering' || timesPressed === 1) return;
-                
-                silenceTimerRef.current = setTimeout(() => {
-                    announce("Натиснете още веднъж");
-                }, 5000);
-            }}
-            style={{flex: 1}}>
-            <View style={styles.container}>
-                <Text style={styles.PromptText}>{screenText}</Text>
-            </View>
-        </Pressable>
+            } else {
+                announce("Възникна грешка. Опитай пак.");
+                setPhase('unmounted'); // total restart
+            };
+        }
         
+        register();
+    }
 
-        <Pressable // improve accessibility
-                   // check if there is a screen reader then generate or just add the fields whatevers best
+    
+    const selectDisability = () => {
+        const stage = STAGES.find(s => s.phase === registerPhase) as Stage;
+
+        let result = determineNextPhase(stage);
+
+        selectDisabilityHelper(stage.disability, result.nextRegisterPhase, result.nextPhase);
+    }
+
+
+    const startFlow = () => {
+        setPhase('registering');
+        stopVibrationsSpeech();
+    }
+
+
+    // maybe add big BACK button for SR users ? ask others opinion
+    return (
+        <Pressable
+            accessible={true}
+            accessibilityLabel={phase === "registering" ? 'Confirm disability':
+                                phase === 'confirming' ? 'Confirm registration':
+                                'Start registration flow'
+            }
+            accessibilityRole="button"
+            accessibilityActions={[
+                {name: 'activate', label: phase === 'registering' ? 'start-register-proccess': // either we begin registration flow
+                                          phase === 'confirming' ? 'confirm-disabilities':     // or we confirm the result
+                                          'select-disability'},                                // or we select the disability from the flow
+                {name: 'escape', label: 'go-back'}
+            ]}
+            onAccessibilityAction={event => {
+                switch (event.nativeEvent.actionName) {
+                    case 'activate':
+                        switch (phase) {
+                            case 'confirming':
+                                confirmRegister();
+                                break;
+
+                            case 'registering':
+                                selectDisability();
+                                break;
+
+                            case 'unmounted':
+                                startFlow();
+                                break;
+                        }
+
+                        break;
+
+                    case 'escape':
+                        goBack();
+                }
+            }}
+
+
+
+            style={styles.container}
+
+            onPressIn={() => {
+                if (phase === 'confirming') Vibration.vibrate([0, 500], true);
+                else Vibration.vibrate([0, 100]);
+                
+            }}
             onPress={() => {
-
+                handlePress();
             }}
             onLongPress={() => {
-
+                if (phase === 'confirming') {
+                   confirmRegister();
+                }
             }}
+
+            onPressOut={() => {
+                Vibration.cancel();
+            }}
+
+            delayLongPress={LONG_PRESS_MIN_LENGTH_MS}
         >
-            <Text>{screenText}</Text>
+            <Text style={styles.PromptText}>{screenText}</Text>
         </Pressable>
-
-        </>
-
     )
 }
 

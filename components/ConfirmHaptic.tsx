@@ -1,5 +1,5 @@
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { Vibration, View } from "react-native";
+import { Pressable, Vibration, View } from "react-native";
 import { useEffect, useState } from "react";
 import { registerUser } from '@/storage/profile';
 
@@ -16,7 +16,7 @@ export default function ConfirmHaptic({
     onRegister: () => void,
 }) {
     /*
-    Display simple message in vibrations, wait for the confirmation and proceed only then
+    Display simple message in vibrations, wait for the confirmation that the user could feel signals by vibration
 
     1. Display: "bz bz bz bz bz" with little intervals in between so the user understands he needs to press the screen
     2. If succesful call the onConfirm, if not wait for it to be completed
@@ -45,30 +45,17 @@ export default function ConfirmHaptic({
     useEffect(() => {
         if (phase === "confirming") vibrateInPattern();
     }, [phase])
-
-    const longHold = Gesture.LongPress()
-        .onBegin(() => {
-            Vibration.cancel();
-            Vibration.vibrate([0, 500], true);
-            }
-        )
-        .minDuration(2000)
-        .onStart(() => {
-            setPhase('registering');
-            Vibration.cancel();
-        })
-        .onFinalize((e, succes) => {
-            Vibration.cancel();
-
-            if (!succes) vibrateInPattern();
-            
-        }).runOnJS(true);
         
     return (
-        <GestureDetector gesture={longHold}>
-            <View style={{ flex: 1, backgroundColor: '#2A9D8F' }} collapsable={false}>
-                
-            </View>
-        </GestureDetector>
+        <Pressable
+            style={{ flex: 1, backgroundColor: '#2A9D8F' }}
+            onPressIn={() => {
+                Vibration.vibrate([0, 100]);
+            }}
+            onPress={() => {
+                setPhase('registering');
+            }}
+
+        />
     );
 }

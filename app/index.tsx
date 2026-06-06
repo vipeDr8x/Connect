@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import SplashScreenView from '@/components/SplashScreen'
 import MainScreen from '@/components/MainScreen'
+import MainRouterScreen from '@/components/MainRouterScreen'
 import Register from '@/components/Register'
 import { checkUser } from '@/storage/profile'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-
+import { UserProfile } from '@/types/profile'
 
 export default function Index() {
     // Index page acts as a router for screens and not just displaying one static screen
@@ -22,7 +23,7 @@ export default function Index() {
     AsyncStorage.removeItem("@user_profile")
 
     const [phase, setPhase] = useState<Phase>(null);
-    const [user, setUser] = useState<null|string|undefined>(undefined); // null or UserProfile (TODO)
+    const [user, setUser] = useState<null|UserProfile|undefined>(undefined);
     /* 
     undefined signifies there isn't a result yet
     null is set if there is no profile
@@ -32,7 +33,7 @@ export default function Index() {
     
     useEffect(() => {
         const check = async () => {
-            let result: null|string = await checkUser();
+            let result: null|UserProfile = await checkUser();
 
             setUser(result);
         }
@@ -52,8 +53,8 @@ export default function Index() {
         case 'needs-register':
             return <Register onRegister={() => setPhase('ready')}/>
             
-        case 'ready':
-            return <MainScreen />;
+        case 'ready': // check if user can communicate through fast channel otherwise start speed recognizing process
+            return <MainRouterScreen />
     }
                 
     return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)}/>
