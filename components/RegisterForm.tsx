@@ -1,6 +1,7 @@
 import { LONG_PRESS_MIN_LENGTH_MS } from '@/config';
 import { speak, stopVibrationsSpeech } from '@/core/output';
 import { registerUser } from '@/storage/profile';
+import { theme } from '@/themes/colors';
 import { Disability } from '@/types/profile';
 import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -288,12 +289,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#2A9D8F', 
+        backgroundColor: theme.primary, 
         padding: 20,
     },
     PromptText: {
         maxWidth: '85%',
-        color: '#FFFFFF',
+        color: theme.mainTextColor,
         fontSize: 42,
         fontWeight: 'bold',
         textAlign: 'center',

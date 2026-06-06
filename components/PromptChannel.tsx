@@ -3,6 +3,7 @@ import { Vibration, Pressable, Text, AccessibilityInfo, StyleSheet } from 'react
 import { CommunicationChannel } from '@/types/output';
 import { speak } from '@/core/output'
 import { LONG_PRESS_MIN_LENGTH_MS } from '@/config/index';
+import { theme } from '@/themes/colors';
 
 
 const PROMPT_MESSAGE = "Задръжте с пръст на екрана";
@@ -98,12 +99,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#2A9D8F', 
+        backgroundColor: theme.primary, 
         padding: 20,
     },
     PromptText: {
         maxWidth: '75%',
-        color: '#FFFFFF',
+        color: theme.mainTextColor,
         fontSize: 53,
         fontWeight: 'bold',
         textAlign: 'center',

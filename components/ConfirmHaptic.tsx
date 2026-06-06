@@ -2,6 +2,7 @@ import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { Pressable, Vibration, View } from "react-native";
 import { useEffect, useState } from "react";
 import { registerUser } from '@/storage/profile';
+import { theme } from "@/themes/colors";
 
 
 const vibrateInPattern = () => {
@@ -48,7 +49,7 @@ export default function ConfirmHaptic({
         
     return (
         <Pressable
-            style={{ flex: 1, backgroundColor: '#2A9D8F' }}
+            style={{ flex: 1, backgroundColor: theme.primary }}
             onPressIn={() => {
                 Vibration.vibrate([0, 100]);
             }}

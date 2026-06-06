@@ -1,3 +1,4 @@
+import { theme } from "@/themes/colors";
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect } from "react";
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5E5CC",
+    backgroundColor: theme.primary,
     overflow: "hidden",
   },
   video: {

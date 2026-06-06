@@ -1,5 +1,6 @@
 import { translateFromMorse } from '@/core/morse';
 import { displayMessageVibrationsSpeech, displayMessageVibrationsSpeechSpecialized } from '@/core/output';
+import { theme } from '@/themes/colors';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, Vibration, View } from "react-native";
 
@@ -144,7 +145,7 @@ export default function MainScreen(){
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2A9D8F'
+        backgroundColor: theme.primary
     },
     upperHalf: {
         width: '100%',
@@ -163,12 +164,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.25)', 
         padding: 20,
         borderWidth: 1.5,
-        borderColor: '#FFFFFF',
+        borderColor: theme.mainTextColor,
         width: '100%',
         borderRadius: 20
     },
     labelText: {
-        color: '#FFFFFF',
+        color: theme.mainTextColor,
         fontSize: 26,
         fontWeight: 'bold',
         marginVertical: 8,

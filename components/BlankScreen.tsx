@@ -1,3 +1,4 @@
+import { theme } from '@/themes/colors';
 import { View, StyleSheet, Text } from 'react-native';
 
 export default function BlankScreen() {
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#2A9D8F', 
+        backgroundColor: theme.primary, 
         padding: 20,
     },
     PromptText: {
