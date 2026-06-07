@@ -7,8 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { UserProfile } from '@/types/profile'
 
 export default function Index() {
-  // Index page acts as a router for screens and not just displaying one static screen
-  /* 
+    // Index page acts as a router for screens and not just displaying one static screen
+    /* 
     1. We need to determine to which screen we are going to switch:
     - the profile registration
     - the MainScreen screen from MainScreen.tsx (user has an account)
