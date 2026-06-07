@@ -1,0 +1,1 @@
+export const LONG_PRESS_MIN_LENGTH_MS = 1500;

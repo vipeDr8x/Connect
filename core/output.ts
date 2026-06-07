@@ -1,7 +1,9 @@
+import { getScreenReaderEnabled } from '@/accessibility/screenReader';
 import { translateToMorse } from '@/core/morse';
-import { AccountType } from '@/types/profile';
+import { CommunicationChannel } from '@/types/output';
+import { Disability } from '@/types/profile';
 import * as Speech from 'expo-speech';
-import { Vibration } from "react-native";
+import { AccessibilityInfo, Vibration } from "react-native";
 
 
 export function getMessageAsVibrationsArray(messageInMorse: string): number[] {
@@ -26,19 +28,48 @@ export function getMessageAsVibrationsArray(messageInMorse: string): number[] {
 
 }
 
+export function speak(message: string) {
+    getScreenReaderEnabled () ? AccessibilityInfo.announceForAccessibility(message): Speech.speak(message, {language: 'bg'});
+}
 
-export function displayMessageVibrationsSpeech(message: string, accountType: AccountType){
+export function displayMessageVibrationsSpeechSpecialized(message: string, accountType: Disability){
     const messageMorse = translateToMorse(message);
 
     // for now an account must have only one disability (TODO -> update to multiple)
     switch (accountType){
         case 'non-verbal':
         case 'blind':
-            Speech.speak(message, {language: 'bg'});
+            speak(message);
             break;
         case 'deaf':
             Vibration.vibrate(getMessageAsVibrationsArray(messageMorse));
             break;
     }
         
+}
+
+export function displayMessageVibrationsSpeech(message: string, channel: CommunicationChannel){
+    const messageMorse = translateToMorse(message);
+
+    if (channel === "text-speech") {
+        speak(message);
+        return;
+    }
+
+    const vibrationsArray = getMessageAsVibrationsArray(messageMorse);
+
+    if (channel === 'vibration') {
+        Vibration.vibrate(vibrationsArray);
+        return;
+    }
+
+    speak(message);
+    Vibration.vibrate(vibrationsArray);
+    
+    // return vibrationsArray.filter((v, i) => i % 2 !== 0).reduce((x, y) => x + y);
+}
+
+export function stopVibrationsSpeech(){
+    Vibration.cancel();
+    Speech.stop();
 }

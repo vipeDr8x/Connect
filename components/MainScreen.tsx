@@ -1,5 +1,6 @@
 import { translateFromMorse } from '@/core/morse';
-import { displayMessageVibrationsSpeech } from '@/core/output';
+import { displayMessageVibrationsSpeech, displayMessageVibrationsSpeechSpecialized } from '@/core/output';
+import { theme } from '@/themes/colors';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, Vibration, View } from "react-native";
 
@@ -35,25 +36,25 @@ export default function MainScreen(){
                 const result = translateFromMorse(morseMessage)
                 setTranslatedMorse(result);
 
-                displayMessageVibrationsSpeech("Край на въвеждането на морзов код. Вие казахте: ", accountType);
-                displayMessageVibrationsSpeech(result, accountType);
+                displayMessageVibrationsSpeechSpecialized("Край на въвеждането на морзов код. Вие казахте: ", accountType);
+                displayMessageVibrationsSpeechSpecialized(result, accountType);
 
             } catch (error){
                 let message = error instanceof Error ? error.message: String(error);
-                displayMessageVibrationsSpeech(message, accountType);
+                displayMessageVibrationsSpeechSpecialized(message, accountType);
             }
 
-           displayMessageVibrationsSpeech("За да започнете да въвеждате ново съобщение, натиснете два пъти на екрана", accountType);
+           displayMessageVibrationsSpeechSpecialized("За да започнете да въвеждате ново съобщение, натиснете два пъти на екрана", accountType);
         }
         else if (phase === 'idle'){
-            displayMessageVibrationsSpeech("Натиснете два пъти на екрана, за да започнете да въвеждате морзов код.", accountType);
+            displayMessageVibrationsSpeechSpecialized("Натиснете два пъти на екрана, за да започнете да въвеждате морзов код.", accountType);
         }
     }, [phase])
     
     
     useEffect(() => {
         if (timesPressed == 2) {
-            displayMessageVibrationsSpeech("Вече можете да започнете да въвеждате морзов код на екрана", accountType);
+            displayMessageVibrationsSpeechSpecialized("Вече можете да започнете да въвеждате морзов код на екрана", accountType);
             setMorseMessage('');
             setPhase('receiving');
             setTimesPressed(0);
@@ -144,7 +145,7 @@ export default function MainScreen(){
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2A9D8F'
+        backgroundColor: theme.primary
     },
     upperHalf: {
         width: '100%',
@@ -163,12 +164,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.25)', 
         padding: 20,
         borderWidth: 1.5,
-        borderColor: '#FFFFFF',
+        borderColor: theme.mainTextColor,
         width: '100%',
         borderRadius: 20
     },
     labelText: {
-        color: '#FFFFFF',
+        color: theme.mainTextColor,
         fontSize: 26,
         fontWeight: 'bold',
         marginVertical: 8,

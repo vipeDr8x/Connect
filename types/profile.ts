@@ -1,9 +1,9 @@
-export type AccountType = 'deaf' | 'blind' | 'non-verbal';
+export type Disability = 'deaf' | 'blind' | 'non-verbal';
 
 export interface UserProfile {
     // 'disabilities': Set<'deaf' | 'blind' | 'non-verbal'>, for future multi-disabilities versions
-    'disabilities': 'deaf' | 'blind' | 'non-verbal',
-    'timings': {
+    'disabilities': Set<Disability>,
+    'timings'?: {
         // all values are in ms
         'perSymbol': number,
         'perLetter': number,
