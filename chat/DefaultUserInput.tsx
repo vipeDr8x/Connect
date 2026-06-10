@@ -17,7 +17,7 @@ export default function DefaultUserInput({ handleConfirmMessage, onBack, onCommi
     
     
     const username = sender === 'user1' ? 'Потребител 1': 'Потребител 2';
-    const { isRecording, toggleVoiceRecording } = useVoiceInput({ onCommitMessage });
+    const { isRecording, toggleVoiceInput } = useVoiceInput({ onCommitMessage });
     const [textInputVal, setTextInputVal] = useState<string>("");
 
     return (
@@ -69,7 +69,7 @@ export default function DefaultUserInput({ handleConfirmMessage, onBack, onCommi
                         styles.halfButton,
                         { backgroundColor: isRecording ? "#E63946" : BTN },
                     ]}
-                    onPress={() => toggleVoiceRecording(sender)}
+                    onPress={() => toggleVoiceInput(sender)}
                 >
                     <Text style={styles.halfButtonText}>
                         {isRecording ? "Спри и изпрати" : "Започни запис на глас"}

@@ -8,7 +8,7 @@ export default function BlindUserInput( { onCommitMessage }: {
     onCommitMessage: (sender: Turn, text: string, isVoice: boolean,) => void;
 } ) {
 
-    const { isRecording, toggleVoiceRecording } = useVoiceInput({ onCommitMessage });
+    const { isRecording, toggleVoiceInput } = useVoiceInput({ onCommitMessage });
 
     return (
         <View style={styles.container}>
@@ -39,7 +39,7 @@ export default function BlindUserInput( { onCommitMessage }: {
                         alignItems: "center",
                     },
                 ]}
-                onPress={() => toggleVoiceRecording("user1")}
+                onPress={() => toggleVoiceInput("user1")}
             >
                 <Text style={styles.halfButtonText}>
                     {isRecording
