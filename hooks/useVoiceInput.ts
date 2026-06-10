@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { speak } from '@/core/output';
 import { Turn } from "@/chat/types";
-import { useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
+import { useAudioRecorder, RecordingPresets, AudioModule, setAudioModeAsync  } from 'expo-audio';
 import { Vibration } from "react-native";
 import { stopSpeech } from "@/core/output";
 
@@ -43,11 +43,23 @@ export default function useVoiceInput( { onCommitMessage }: {
         if (!isRecording) {
             const perm = await AudioModule.requestRecordingPermissionsAsync();
             if (!perm.granted) { speak("Няма достъп до микрофона."); return; }
+
+            await setAudioModeAsync({
+                allowsRecording: true,
+                playsInSilentMode: true
+            });
+
             await recorder.prepareToRecordAsync();
             recorder.record();
             setIsRecording(true);
         } else {
             await recorder.stop();
+
+            await setAudioModeAsync({
+                allowsRecording: false,
+                playsInSilentMode: true,
+            });
+
             setIsRecording(false);
             setIsTranscribing(true);
             speak("Обработка на записа.");
