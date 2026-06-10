@@ -47,6 +47,7 @@ export default function ChatHistory({ displayMessages, currentTurn, onReply, onR
                         <Text style={styles.logText}>Няма записани съобщения.</Text>
                     ) : (
                         displayMessages.map((msg) => (
+                            // console.log(msg);
                             <View key={msg.id} style={styles.messageRow}>
                                 <Text style={styles.messageSender}>
                                     {msg.sender === "user1" ? "Потр. 1" : "Потр. 2"}

@@ -94,7 +94,7 @@ export default function ProfileChat({ onReturn }: {
 
             else if (isUserBlind) {
                 // View needs to be compatible not only if he is blind (assuming ultimately he isn't non-verbal), but non-verbal, when we introduce braille input
-                return <BlindUserInput onCommitMessage={handleConfirmMessage}/>
+                return <BlindUserInput onCommitMessage={commitMessage}/>
             }
 
             // lets the user1-reply with the not blind case fall through the same as user2-reply since the code is identical

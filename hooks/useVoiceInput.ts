@@ -1,38 +1,68 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { speak } from '@/core/output';
 import { Turn } from "@/chat/types";
+import { useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
+import { Vibration } from "react-native";
+import { stopSpeech } from "@/core/output";
+
+async function transcribe(uri: string): Promise<string> {
+    const form = new FormData();
+    form.append('file', { uri, name: 'speech.m4a', type: 'audio/m4a' } as any);
+    form.append('model', 'whisper-large-v3');
+    form.append('language', 'bg');
+
+    const KEY = process.env.EXPO_PUBLIC_GROQ_KEY;
+
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${KEY}` },
+        body: form,
+    });
+    console.log(res);
+    if (!res.ok) throw new Error('STT failed');
+    const data = await res.json();
+    return data.text;
+}
 
 export default function useVoiceInput( { onCommitMessage }: {
     onCommitMessage: (sender: Turn, text: string, isVoice: boolean,) => void;
 }) {
     
     // ---- Recording state via ref to avoid stale closures ----
-    const isRecordingRef = useRef<boolean>(false);
+    const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
     const [isRecording, setIsRecording] = useState<boolean>(false);
-
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    
     // ==========================================
     // VOICE RECORDING CONTROLLER
     // Reads/writes isRecordingRef so there is never a stale closure.
     // ==========================================
-    const toggleVoiceRecording = (sender: Turn) => {
-        if (!isRecordingRef.current) {
-            speak("Записът започна. Говорете сега.");
+    const toggleVoiceInput = useCallback(async (sender: Turn) => {
+        Vibration.vibrate(50);
+        stopSpeech();
+        if (!isRecording) {
+            const perm = await AudioModule.requestRecordingPermissionsAsync();
+            if (!perm.granted) { speak("Няма достъп до микрофона."); return; }
+            await recorder.prepareToRecordAsync();
+            recorder.record();
+            setIsRecording(true);
+        } else {
+            await recorder.stop();
+            setIsRecording(false);
+            setIsTranscribing(true);
+            speak("Обработка на записа.");
+            try {
+                const text = await transcribe(recorder.uri!);  // ← API call
+                onCommitMessage(sender, text, true);
+                console.log("here!!!");
+            } catch (e){
+                console.log(e);
+                speak("Грешка при разпознаването. Опитайте отново.");
+            } finally {
+                setIsTranscribing(false);
+            }
         }
-        else {
-            const timestamp = new Date().toLocaleTimeString("bg-BG", {
-                hour: "2-digit",
-                minute: "2-digit",
-            });
-            const senderLabel = sender === "user1" ? "Потребител 1" : "Потребител 2";
-            const transcribedText = `Гласово съобщение - ${senderLabel}, ${timestamp}`;
+    }, [isRecording, onCommitMessage]);
 
-            onCommitMessage(sender, transcribedText, true);
-        }
-
-        isRecordingRef.current = !isRecordingRef.current;
-        setIsRecording(isRecordingRef.current);
-    };
-
-    return { isRecording, toggleVoiceRecording };
-
+    return { isRecording, isTranscribing, toggleVoiceInput };
 }

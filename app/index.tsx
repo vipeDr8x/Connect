@@ -1,16 +1,16 @@
-import MainRouterScreen from '@/components/MainRouterScreen'
-import Register from '@/register/Register'
-import SplashScreenView from '@/components/SplashScreen'
-import { checkUser } from '@/storage/profile'
-import { UserProfile } from '@/types/profile'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useEffect, useState } from 'react'
+import MainRouterScreen from "@/components/MainRouterScreen";
+import SplashScreenView from "@/components/SplashScreen";
+import Register from "@/register/Register";
+import { checkUser } from "@/storage/profile";
+import { UserProfile } from "@/types/profile";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 
-type Phase = null | 'needs-register' | 'ready';
+type Phase = null | "needs-register" | "ready";
 
 export default function Index() {
-    // Index page acts as a router for screens and not just displaying one static screen
-    /*
+  // Index page acts as a router for screens and not just displaying one static screen
+  /*
     1. We need to determine to which screen we are going to switch:
         - the profile registration
         - the MainScreen screen from MainScreen.tsx (user has an account)
@@ -19,40 +19,39 @@ export default function Index() {
     4. After both things are determined, we need to show the right screen, which the phase signifies
     */
 
-    const [phase, setPhase] = useState<Phase>(null);
-    const [user, setUser] = useState<null | UserProfile | undefined>(undefined);
+  const [phase, setPhase] = useState<Phase>(null);
+  const [user, setUser] = useState<null | UserProfile | undefined>(undefined);
 
+  AsyncStorage.removeItem("@user_profile");
 
-    // AsyncStorage.removeItem("@user_profile");
-    
-    /*
+  /*
     undefined signifies there isn't a result yet
     null is set if there is no profile
     UserProfile signifies there is a registered user
     */
-    const [isAnimationDone, setIsAnimationDone] = useState(false);
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
 
-    useEffect(() => {
-        const check = async () => {
-            let result: null | UserProfile = await checkUser();
-            setUser(result);
-        };
-        check();
-    }, []);
+  useEffect(() => {
+    const check = async () => {
+      let result: null | UserProfile = await checkUser();
+      setUser(result);
+    };
+    check();
+  }, []);
 
-    useEffect(() => {
-        if (isAnimationDone && user !== undefined) {
-            setPhase(user === null ? 'needs-register' : 'ready');
-        }
-    }, [isAnimationDone, user]);
-
-    switch (phase) {
-        case 'needs-register':
-            return <Register onRegister={() => setPhase('ready')} />
-
-        case 'ready': // check if user can communicate through a fast channel otherwise start speed recognizing process
-            return <MainRouterScreen />
+  useEffect(() => {
+    if (isAnimationDone && user !== undefined) {
+      setPhase(user === null ? "needs-register" : "ready");
     }
+  }, [isAnimationDone, user]);
 
-    return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)} />
+  switch (phase) {
+    case "needs-register":
+      return <Register onRegister={() => setPhase("ready")} />;
+
+    case "ready": // check if user can communicate through a fast channel otherwise start speed recognizing process
+      return <MainRouterScreen />;
+  }
+
+  return <SplashScreenView onFinishLoading={() => setIsAnimationDone(true)} />;
 }

@@ -16,6 +16,7 @@ export function useMessageHandling({ messagesRef, setCurrentTurn, setPhase }: {
     // ==========================================
     const commitMessage = useCallback(
     (sender: Turn, text: string, isVoice: boolean) => {
+        console.log("COMMIT:", sender, isVoice, text.slice(0, 20));
         const newMessage: MessageLog = {
             id: Math.random().toString(36).substring(7),
             sender,
