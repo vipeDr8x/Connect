@@ -29,7 +29,10 @@ export function getMessageAsVibrationsArray(messageInMorse: string): number[] {
 }
 
 export function speak(message: string) {
-    getScreenReaderEnabled () ? AccessibilityInfo.announceForAccessibility(message): Speech.speak(message, {language: 'bg'});
+    Speech.stop();
+    console.log("=== AUDIO ANNOUNCEMENT ===:", message);
+    getScreenReaderEnabled () ? AccessibilityInfo.announceForAccessibility(message):
+        Speech.speak(message, {language: 'bg'});
 }
 
 export function displayMessageVibrationsSpeechSpecialized(message: string, accountType: Disability){
@@ -71,5 +74,9 @@ export function displayMessageVibrationsSpeech(message: string, channel: Communi
 
 export function stopVibrationsSpeech(){
     Vibration.cancel();
+    Speech.stop();
+}
+
+export function stopSpeech() {
     Speech.stop();
 }

@@ -1,10 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserProfile } from '@/types/profile'
 
-export async function checkUser() {
+export async function checkUser(): Promise<UserProfile | null> {
     try {
         const result = await AsyncStorage.getItem('@user_profile');
-        return result !== null ? JSON.parse(result): null
+        return result ? (JSON.parse(result) as UserProfile): null
 
     } catch (e) {
         // error reading value

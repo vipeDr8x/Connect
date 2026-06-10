@@ -1,8 +1,9 @@
 import MainRouterScreen from '@/components/MainRouterScreen'
-import Register from '@/components/Register'
+import Register from '@/register/Register'
 import SplashScreenView from '@/components/SplashScreen'
 import { checkUser } from '@/storage/profile'
 import { UserProfile } from '@/types/profile'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useEffect, useState } from 'react'
 
 type Phase = null | 'needs-register' | 'ready';
@@ -20,6 +21,10 @@ export default function Index() {
 
     const [phase, setPhase] = useState<Phase>(null);
     const [user, setUser] = useState<null | UserProfile | undefined>(undefined);
+
+
+    // AsyncStorage.removeItem("@user_profile");
+    
     /*
     undefined signifies there isn't a result yet
     null is set if there is no profile
@@ -45,7 +50,7 @@ export default function Index() {
         case 'needs-register':
             return <Register onRegister={() => setPhase('ready')} />
 
-        case 'ready': // check if user can communicate through fast channel otherwise start speed recognizing process
+        case 'ready': // check if user can communicate through a fast channel otherwise start speed recognizing process
             return <MainRouterScreen />
     }
 
