@@ -2,7 +2,7 @@ import { theme } from "@/themes/colors";
 import { useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
 
 interface SplashProps {
   onFinishLoading?: () => void;
@@ -10,7 +10,7 @@ interface SplashProps {
 
 const useTheme = () => ({
   colors: {
-    background: "#F5E5CC",
+    background: "#F2EBE0",
     text: "#FFFFFF",
   },
 });
@@ -46,6 +46,9 @@ export default function SplashScreen({ onFinishLoading }: SplashProps) {
         contentFit="cover"
         nativeControls={false}
       />
+      <Text style={styles.copyright}>
+        © 2026 CONNECT. Всички права запазени!
+      </Text>
     </View>
   );
 }
@@ -61,8 +64,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   video: {
-    width: width * 1.4,
+    width: width * 1.2,
     height: width * 0.8,
-    marginLeft: width * 0.12,
+    alignSelf: "center",
+  },
+  copyright: {
+    position: "absolute",
+    bottom: 40,
+    color: theme.brand,
+    fontSize: 17,
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });

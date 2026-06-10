@@ -652,17 +652,17 @@ const styles = StyleSheet.create({
   },
   wipText: {
     fontSize: 18,
-    color: "#FFF",
+    color: "#ffffff",
     textAlign: "center",
   },
   inputField: {
     width: "95%",
-    backgroundColor: "rgba(255, 255, 255, 0)",
+    backgroundColor: "rgba(165, 109, 109, 0.15)",
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: "#000000",
+    color: "#3153a3",
     borderWidth: 1,
     borderColor: "rgba(69, 47, 47, 0.4)",
     marginBottom: 8,
@@ -681,14 +681,14 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   messageSender: {
-    color: "#FFF",
+    color: "#1D3557",
     fontWeight: "bold",
     fontSize: 13,
     marginBottom: 2,
     opacity: 0.8,
   },
   logText: {
-    color: "#ffffff",
+    color: "#1D3557",
     fontSize: 15,
   },
 });
