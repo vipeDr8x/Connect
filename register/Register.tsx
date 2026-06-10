@@ -1,6 +1,6 @@
-import ConfirmHaptic from '@/components/ConfirmHaptic';
-import PromptChannel from '@/components/PromptChannel';
-import RegisterForm from '@/components/RegisterForm';
+import ConfirmHaptic from '@/register/ConfirmHaptic';
+import PromptChannel from '@/register/PromptChannel';
+import RegisterForm from '@/register/RegisterForm';
 import BlankScreen from '@/components/BlankScreen';
 import { CommunicationChannel } from '@/types/output';
 import { useRef, useState } from 'react';

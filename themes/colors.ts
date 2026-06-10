@@ -1,13 +1,13 @@
 const colors = {
-  steelBlue: "#5B8FA8",
+  steelBlue: "#352117",
   warmColor: "#E8C89A",
-  warmCream: "#F2EBE0",
+  warmCream: "#E2D5BC",
   white: "#FFFFFF",
   black: "#0000",
 };
 
 export const theme = {
-  primary: colors.steelBlue,
+  primary: colors.warmCream,
   mainTextColor: colors.black,
   surface: colors.white,
   brand: colors.steelBlue,

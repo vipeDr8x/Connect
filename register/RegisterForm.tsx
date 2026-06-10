@@ -70,7 +70,7 @@ export default function RegisterForm({
     });
   }, []);
 
-  const goBack = useCallback((): boolean => {
+  const goBack = useCallback((): boolean => { // this functionality is for SR users only
     switch (phase) {
       case "confirming":
         rejectConfirmation();
@@ -220,7 +220,7 @@ export default function RegisterForm({
 
     const register = async () => {
       const result = await registerUser({
-        disabilities: new Set(disabilitiesRef.current),
+        disabilities: disabilitiesRef.current,
       });
 
       if (result) {

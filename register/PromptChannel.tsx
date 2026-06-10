@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: theme.primary, 
+        backgroundColor: theme.primary,
         padding: 20,
     },
     PromptText: {
